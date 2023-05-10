@@ -8,7 +8,7 @@ export const main = handler(async (event) => {
     TableName: Table.Notes.tableName,
     // 'Key' defines the partition key and sort key of the item to be updated
     Key: {
-      userId: "123", // The id of the author
+      userId: event.requestContext.authorizer.iam.cognitoIdentity.identityId,
       noteId: event.pathParameters.id, // The id of the note from the path
     },
     // 'UpdateExpression' defines the attributes to be updated
@@ -28,3 +28,16 @@ export const main = handler(async (event) => {
 
   return { status: true };
 });
+
+npx aws-api-gateway-cli-test \
+--username='admin@example.com' \
+--password='Passw0rd!' \
+--user-pool-id='eu-central-1_09tqrln3q' \
+--app-client-id='7ftn66tofoq3j8hfk5mm6ugunp' \
+--cognito-region='eu-central-1' \
+--identity-pool-id='eu-central-1:e23bd6c4-26e9-43f0-ab53-77ff72856159' \
+--invoke-url='https://odexetz7ph.execute-api.eu-central-1.amazonaws.com' \
+--api-gateway-region='eu-central-1' \
+--path-template='/notes' \
+--method='POST' \
+--body='{"content":"hello world","attachment":"hello.jpg"}' 
